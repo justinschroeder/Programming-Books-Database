@@ -1,4 +1,5 @@
 from sqlalchemy.sql.coercions import expect_col_expression_collection
+from sqlalchemy.sql.expression import column
 from models import (Base, session, Book, engine)
 import csv
 import datetime
@@ -23,6 +24,22 @@ def menu():
             \rA Number from 1-5.
             \rPress enter to try again.''')
 
+
+def sub_menu():
+    while True:
+        print('''
+        \n1) EDIT
+        \r2) DELETE
+        \r3) Return to main menu
+        ''')
+        choice = input('What would you like to do?   ')
+        if choice in ['1', '2', '3']:
+            return choice
+        else:
+            input('''
+            \rPlease choose one of the available options.
+            \rA Number from 1-3.
+            \rPress enter to try again.''')
 
 # add books to db
 # edit books in db
@@ -88,6 +105,30 @@ def clean_id(id_str, options):
             return
 
 
+def edit_check(column_name, current_value):
+    print(f'\nEDIT {column_name}')
+    if column_name == 'Price':
+        print(f'\rCurrent Value: {current_value / 100}')
+    elif column_name == 'Date':
+        print(f'\rCurrent Value: {current_value.strftime("%B %d, %Y")}')
+    else:
+        print(f'\rCurrent Value: {current_value}')
+
+    if column_name == 'Date' or column_name == 'Price':
+        while True:
+            changes = input('What would you like to change the value to: ')
+            if column_name == 'Date':
+                changes = clean_date(changes)
+                if type(changes) == datetime.date:
+                    return changes
+            elif column_name == 'Price':
+                changes = clean_price(changes)
+                if type(changes) == int:
+                    return changes
+    else:
+        return input('What would you like to change the value to: ')
+
+
 def add_csv():
     with open('suggested_books.csv') as csv_file:
         data = csv.reader(csv_file)
@@ -149,9 +190,22 @@ def app():
             \n{the_book.title} by {the_book.author}
             \rPublished: {the_book.published_date}
             \rprice: ${the_book.price / 100}''')
-            input('\nPress ENTER to return to main menu.')
+            sub_choice = sub_menu()
+            if sub_choice == '1':
+                the_book.title = edit_check('Title', the_book.title)
+                the_book.author = edit_check('Author', the_book.author)
+                the_book.published_date = edit_check('Date', the_book.published_date)
+                the_book.price = edit_check('Price', the_book.price)
+                session.commit()
+                print('Book updated!')
+                time.sleep(1.5)
+            elif sub_choice == '2':
+                session.delete(the_book)
+                session.commit()
+                print('Book deleted!')
+                time.sleep(1.5)
         elif choice == '4':
-            # analysis
+            
             pass
         else:
             print('GOODBYE')
