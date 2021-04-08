@@ -41,12 +41,6 @@ def sub_menu():
             \rA Number from 1-3.
             \rPress enter to try again.''')
 
-# add books to db
-# edit books in db
-# delete books from db
-# search books in db
-# data cleaning functions
-
 
 def clean_date(date_str):
     months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -205,8 +199,16 @@ def app():
                 print('Book deleted!')
                 time.sleep(1.5)
         elif choice == '4':
-            
-            pass
+            oldest_book = session.query(Book).order_by(Book.published_date).first()
+            newest_book = session.query(Book).order_by(Book.published_date.desc()).first()
+            total_books = session.query(Book).count()
+            python_books = session.query(Book).filter(Book.title.like('%Python%')).count()
+            print(f'''\n********BOOK ANALYSIS********
+            \rOldest Book: {oldest_book}
+            \rNewest Book: {newest_book}
+            \rTotal Books: {total_books}
+            \rNumber of Python Books: {python_books}''')
+            input('\nPress ENTER to return to main menu.')
         else:
             print('GOODBYE')
             app_running = False
