@@ -106,7 +106,9 @@ def app():
             print('Book Added!')
             time.sleep(1.5)
         elif choice == '2':
-            # view books
+            for book in session.query(Book):
+                print(f'{book.id}'+' '*(3-len(str(book.id)))+f'| {book.title} | {book.author}')
+            input('\nPress ENTER to return to main menu.')
             pass
         elif choice == '3':
             # search books
@@ -124,6 +126,3 @@ if __name__ == '__main__':
     Base.metadata.create_all(engine)
     add_csv()
     app()
-    
-    for book in session.query(Book):
-        print(book)
